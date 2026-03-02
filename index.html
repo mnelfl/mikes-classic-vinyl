@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Mike's Classic Vinyl</title>
   <meta name="theme-color" content="#111111"/>
+  <link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
   <style>
     :root{
       --bg:#0f1115; --panel:#171a21; --panel2:#12141a; --text:#e9ecf1; --muted:#aab1bf;
@@ -967,6 +969,11 @@ $("#manualBarcode").addEventListener("keydown",(e)=>{ if(e.key==="Enter") lookup
 scanModal.addEventListener("close", stopScanner);
 
 setMode("grid"); setTab("collection"); render();
+</script>
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js", { scope: "./" });
+}
 </script>
 </body>
 </html>
