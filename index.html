@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Mike's Classic Vinyl</title>
+  <meta name="theme-color" content="#111111"/>
+  <style>
+    :root{
+      --bg:#0f1115; --panel:#171a21; --panel2:#12141a; --text:#e9ecf1; --muted:#aab1bf;
+      --line:#2a2e36; --accent:#7dd3fc; --good:#34d399; --warn:#fbbf24; --bad:#fb7185;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:
+        radial-gradient(900px 600px at 20% 0%, rgba(125,211,252,.10), transparent 60%),
+        radial-gradient(900px 600px at 80% 20%, rgba(52,211,153,.08), transparent 55%),
+        var(--bg);
+      color:var(--text); font-family:var(--sans);
+    }
+    header{
+      position:sticky; top:0; z-index:5;
+      backdrop-filter: blur(10px);
+      background: rgba(15,17,21,.75);
+      border-bottom:1px solid var(--line);
+    }
+    .bar{
+      display:flex; align-items:center; gap:10px;
+      padding:14px 16px;
+      max-width:1200px; margin:0 auto;
+    }
+    .brand{display:flex; align-items:center; gap:10px; min-width:240px}
+    .logo{
+      width:38px; height:38px; border-radius:12px;
+      background: linear-gradient(135deg, rgba(125,211,252,.9), rgba(52,211,153,.9));
+      display:grid; place-items:center; color:#0b0f14; font-weight:900;
+      box-shadow: var(--shadow);
+      user-select:none;
+    }
+    .brand h1{font-size:16px; margin:0; line-height:1.1}
+    .brand small{display:block; color:var(--muted); font-size:12px; margin-top:2px}
+    .search{
+      flex:1; display:flex; gap:10px; align-items:center;
+      background: rgba(18,20,26,.75);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:8px 10px;
+    }
+    .search input{
+      width:100%; border:0; outline:none; background:transparent; color:var(--text);
+      font-size:14px;
+    }
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(18,20,26,.8);
+      color:var(--text);
+      padding:9px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      transition: transform .05s ease, border-color .2s ease;
+      font-size:13px;
+      user-select:none;
+    }
+    .btn:hover{ border-color: rgba(125,211,252,.45); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{ background: rgba(125,211,252,.12); border-color: rgba(125,211,252,.35); }
+    .btn.good{ background: rgba(52,211,153,.10); border-color: rgba(52,211,153,.35); }
+    .btn.bad{ background: rgba(251,113,133,.10); border-color: rgba(251,113,133,.35); }
+    .btn.small{ padding:7px 10px; border-radius:10px; font-size:12px; }
+    .wrap{max-width:1200px; margin:18px auto; padding:0 16px 60px;}
+    .grid{
+      display:grid; gap:14px;
+      grid-template-columns: 1.2fr .9fr;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr;} .brand{min-width:unset} }
+    .card{
+      background: rgba(23,26,33,.78);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .profile{display:flex; align-items:center; gap:12px;}
+    .avatar{
+      width:46px; height:46px; border-radius:16px;
+      border:1px solid rgba(125,211,252,.35);
+      display:grid; place-items:center;
+      background: rgba(125,211,252,.08);
+      color: var(--text);
+      font-weight:800;
+    }
+    .profile .meta b{display:block; font-size:15px}
+    .profile .meta span{display:block; color:var(--muted); font-size:12px; margin-top:2px}
+    .pill{
+      display:inline-flex; gap:6px; align-items:center;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(18,20,26,.7);
+      color: var(--muted);
+      font-size:12px;
+    }
+    .kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px;}
+    @media (max-width: 520px){ .kpis{grid-template-columns:1fr;} }
+    .kpi{
+      background: rgba(18,20,26,.7);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+    }
+    .kpi b{display:block; font-size:18px}
+    .kpi small{color:var(--muted)}
+    .subrow{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:10px}
+    .tabs{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
+    .tab{
+      padding:8px 10px; border-radius:999px; border:1px solid var(--line);
+      background: rgba(18,20,26,.6); color:var(--muted); cursor:pointer; font-size:12px;
+    }
+    .tab.active{border-color: rgba(125,211,252,.45); color:var(--text); background: rgba(125,211,252,.10)}
+    .listHeader{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      margin:18px 0 10px;
+    }
+    .controls{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+    select{
+      background: rgba(18,20,26,.75);
+      border:1px solid var(--line);
+      color: var(--text);
+      border-radius:12px;
+      padding:9px 10px;
+      outline:none;
+      font-size:13px;
+    }
+    .viewToggle{display:flex; gap:8px}
+    .collectionGrid{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 1100px){ .collectionGrid{grid-template-columns: repeat(4,1fr);} }
+    @media (max-width: 780px){ .collectionGrid{grid-template-columns: repeat(2,1fr);} }
+    .tile{
+      background: rgba(18,20,26,.65);
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+      cursor:pointer;
+      transition: transform .06s ease, border-color .2s ease;
+      min-height:200px;
+      display:flex; flex-direction:column;
+    }
+    .tile:hover{ border-color: rgba(125,211,252,.35); }
+    .tile:active{ transform: translateY(1px); }
+    .cover{
+      height:120px;
+      background: linear-gradient(135deg, rgba(125,211,252,.18), rgba(52,211,153,.12));
+      border-bottom: 1px solid var(--line);
+      display:grid; place-items:center;
+      color: rgba(233,236,241,.85);
+      font-size:12px;
+      position:relative;
+    }
+    .cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .badge{
+      position:absolute; top:8px; left:8px;
+      padding:4px 8px; border-radius:999px;
+      background: rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.12);
+      font-size:11px; color:var(--text);
+    }
+    .tile .t{padding:10px 10px 12px; display:flex; flex-direction:column; gap:4px;}
+    .tile .t b{font-size:13px; line-height:1.2}
+    .tile .t small{color:var(--muted); font-size:12px; line-height:1.2}
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 16px;
+      border:1px solid var(--line);
+      background: rgba(18,20,26,.65);
+    }
+    .table th, .table td{
+      padding:10px 10px;
+      border-bottom: 1px solid var(--line);
+      font-size:13px;
+      text-align:left;
+      vertical-align:top;
+    }
+    .table th{ color: var(--muted); font-weight:700; background: rgba(23,26,33,.6); position:sticky; top:0; }
+    .table tr:hover td{ background: rgba(125,211,252,.06); }
+    .muted{color:var(--muted)}
+    .right{margin-left:auto}
+    dialog{
+      width:min(920px, 92vw);
+      border:1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(15,17,21,.96);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      padding:0;
+    }
+    dialog::backdrop{ background: rgba(0,0,0,.55); }
+    .modalHead{display:flex; align-items:center; gap:10px; padding:14px 14px; border-bottom:1px solid var(--line);}
+    .modalBody{padding:14px;}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    @media (max-width: 740px){ .row{grid-template-columns:1fr;} }
+    .field label{display:block; font-size:12px; color:var(--muted); margin:6px 0}
+    .field input, .field textarea, .field select{width:100%;}
+    input[type="number"], input[type="text"], textarea, select{
+      background: rgba(18,20,26,.75);
+      border:1px solid var(--line);
+      color: var(--text);
+      border-radius:12px;
+      padding:9px 10px;
+      outline:none;
+      font-size:13px;
+    }
+    textarea{min-height:86px; resize:vertical; font-family:var(--sans)}
+    .modalFoot{display:flex; gap:10px; padding:12px 14px; border-top:1px solid var(--line); justify-content:flex-end; flex-wrap:wrap;}
+    .hint{font-size:12px; color:var(--muted); margin-top:8px; line-height:1.35}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;}
+    .toast{
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+      background: rgba(18,20,26,.95);
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      border-radius: 14px;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      display:none; max-width:min(760px, 92vw); font-size:13px;
+    }
+    .toast.show{display:block}
+    .qr{
+      display:grid; place-items:center;
+      padding:10px; border:1px dashed rgba(125,211,252,.35);
+      border-radius:16px; background: rgba(125,211,252,.06);
+      min-height: 160px;
+    }
+    video{width:100%; border-radius:14px; border:1px solid var(--line); background:#000}
+    .smallRow{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  </style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="logo">MCV</div>
+      <div>
+        <h1>Mike's Classic Vinyl</h1>
+        <small>Local-first • Offline • Sync tools • Covers + Barcode</small>
+      </div>
+    </div>
+
+    <div class="search" title="Search artist, title, label, catalog #, notes">
+      <button class="btn small primary" id="searchBtn">Search</button>
+      <input id="q" placeholder="Artist, title, label, catalog #, notes…" />
+      <button class="btn small" id="clearBtn" title="Clear">✕</button>
+    </div>
+
+    <button class="btn primary" id="addBtn">+ Add release</button>
+    <button class="btn" id="scanBtn" title="Scan UPC/EAN with phone camera">Scan</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="card">
+      <div class="profile">
+        <div class="avatar" title="Profile avatar (we’ll add photo later)">MN</div>
+        <div class="meta">
+          <b>Michael Nelson</b>
+          <span>Pensacola, FL • Collector since 2018</span>
+        </div>
+        <div class="right pill">Mode: <b style="color:var(--text)">Admin (you)</b></div>
+        <div class="pill">Teresa: viewer later</div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><small>Collection</small><b id="kCollection">0</b><small class="muted">unique releases</small></div>
+        <div class="kpi"><small>Wantlist</small><b id="kWantlist">0</b><small class="muted">wanted</small></div>
+        <div class="kpi"><small>Copies</small><b id="kCopies">0</b><small class="muted">owned copies</small></div>
+      </div>
+
+      <div class="subrow">
+        <div class="pill">Collection value (manual)</div>
+        <div class="pill">Min: <b id="vMin">$0</b></div>
+        <div class="pill">Median: <b id="vMed">$0</b></div>
+        <div class="pill">Max: <b id="vMax">$0</b></div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <div class="tab active" data-tab="collection">Collection</div>
+        <div class="tab" data-tab="wantlist">Wantlist</div>
+        <div class="tab" data-tab="all">All releases</div>
+        <div class="tab" data-tab="dupes">Duplicates</div>
+      </div>
+
+      <div class="hint">
+        Tip: Click any card to open a release page. Duplicates tab shows anything with 2+ copies.
+        Barcode scan works best on your Samsung in Chrome.
+      </div>
+    </div>
+
+    <div class="card">
+      <b>Quick actions</b>
+      <div class="smallRow" style="margin-top:10px">
+        <button class="btn good" id="addWantBtn">+ Add to wantlist</button>
+        <button class="btn" id="sampleBtn">Add sample data (2 releases)</button>
+        <button class="btn bad" id="wipeBtn">Delete ALL data</button>
+      </div>
+
+      <div class="smallRow" style="margin-top:12px">
+        <button class="btn" id="exportBtn">Export JSON</button>
+        <label class="btn" for="importInput" style="cursor:pointer">Import JSON</label>
+        <input id="importInput" type="file" accept=".json" hidden/>
+      </div>
+
+      <div class="smallRow" style="margin-top:12px">
+        <button class="btn" id="pairBtn">Phone sync helper</button>
+        <button class="btn" id="coversBtn">Fetch covers (all)</button>
+        <button class="btn" id="coversSelBtn">Fetch covers (visible)</button>
+      </div>
+
+      <div class="hint">
+        Sync: easiest is Export on laptop → send file to phone → Import on phone. (Cloud sync can be added later.)
+      </div>
+    </div>
+  </div>
+
+  <div class="listHeader">
+    <b id="listTitle">Collection</b>
+    <div class="controls">
+      <select id="sortBy" title="Sort">
+        <option value="artist_asc">Artist (A→Z)</option>
+        <option value="artist_desc">Artist (Z→A)</option>
+        <option value="title_asc">Title (A→Z)</option>
+        <option value="title_desc">Title (Z→A)</option>
+        <option value="year_desc">Year (new→old)</option>
+        <option value="year_asc">Year (old→new)</option>
+        <option value="added_desc">Recently added</option>
+        <option value="added_asc">Oldest added</option>
+        <option value="copies_desc">Most copies</option>
+        <option value="copies_asc">Fewest copies</option>
+      </select>
+      <div class="viewToggle">
+        <button class="btn small" id="gridBtn">Grid</button>
+        <button class="btn small" id="tableBtn">Table</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<dialog id="releaseModal">
+  <div class="modalHead">
+    <b id="modalTitle">Add release</b>
+    <div class="right"></div>
+    <button class="btn small" onclick="releaseModal.close()">✕</button>
+  </div>
+  <div class="modalBody">
+    <div class="row">
+      <div class="field"><label>Artist</label><input id="fArtist" type="text"/></div>
+      <div class="field"><label>Title</label><input id="fTitle" type="text"/></div>
+      <div class="field"><label>Year</label><input id="fYear" type="text"/></div>
+      <div class="field"><label>Label</label><input id="fLabel" type="text"/></div>
+      <div class="field"><label>Catalog #</label><input id="fCatno" type="text"/></div>
+      <div class="field"><label>Format</label><input id="fFormat" type="text"/></div>
+      <div class="field">
+        <label>Status</label>
+        <select id="fStatus"><option value="collection">Collection</option><option value="wantlist">Wantlist</option></select>
+      </div>
+      <div class="field"><label>Barcode / UPC (optional)</label><input id="fBarcode" type="text"/></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div class="field"><label>Notes</label><textarea id="fNotes"></textarea></div>
+      <div class="field">
+        <label>Value (manual)</label>
+        <div class="row">
+          <div class="field"><label>Min</label><input id="fVmin" type="number" step="0.01" min="0"/></div>
+          <div class="field"><label>Median</label><input id="fVmed" type="number" step="0.01" min="0"/></div>
+          <div class="field"><label>Max</label><input id="fVmax" type="number" step="0.01" min="0"/></div>
+        </div>
+        <div class="hint">Totals update automatically.</div>
+      </div>
+    </div>
+  </div>
+  <div class="modalFoot">
+    <button class="btn" id="fetchCoverBtn">Fetch cover</button>
+    <button class="btn bad" id="deleteReleaseBtn" style="display:none">Delete</button>
+    <button class="btn primary" id="saveReleaseBtn">Save</button>
+  </div>
+</dialog>
+
+<dialog id="detailModal">
+  <div class="modalHead">
+    <b id="dTitle">Release</b>
+    <div class="right"></div>
+    <button class="btn small" onclick="detailModal.close()">✕</button>
+  </div>
+  <div class="modalBody" id="detailBody"></div>
+  <div class="modalFoot">
+    <button class="btn" id="addCopyBtn">+ Add copy</button>
+    <button class="btn" id="editReleaseBtn">Edit</button>
+    <button class="btn" id="fetchCoverDetailBtn">Fetch cover</button>
+    <button class="btn primary" onclick="detailModal.close()">Done</button>
+  </div>
+</dialog>
+
+<dialog id="copyModal">
+  <div class="modalHead">
+    <b>Add copy</b>
+    <div class="right"></div>
+    <button class="btn small" onclick="copyModal.close()">✕</button>
+  </div>
+  <div class="modalBody">
+    <div class="row">
+      <div class="field"><label>Media condition</label>
+        <select id="cMedia">
+          <option>Mint (M)</option><option>Near Mint (NM or M-)</option><option selected>Very Good Plus (VG+)</option>
+          <option>Very Good (VG)</option><option>Good Plus (G+)</option><option>Good (G)</option><option>Fair (F)</option><option>Poor (P)</option>
+        </select>
+      </div>
+      <div class="field"><label>Sleeve condition</label>
+        <select id="cSleeve">
+          <option>Mint (M)</option><option>Near Mint (NM or M-)</option><option selected>Very Good Plus (VG+)</option>
+          <option>Very Good (VG)</option><option>Good Plus (G+)</option><option>Good (G)</option><option>Fair (F)</option><option>Poor (P)</option>
+        </select>
+      </div>
+      <div class="field"><label>Paid</label><input id="cPaid" type="number" step="0.01" min="0"/></div>
+      <div class="field"><label>Purchase date</label><input id="cPdate" type="text" placeholder="YYYY-MM-DD"/></div>
+      <div class="field"><label>Location</label><input id="cLoc" type="text"/></div>
+      <div class="field"><label>Notes</label><input id="cNotes" type="text"/></div>
+    </div>
+  </div>
+  <div class="modalFoot"><button class="btn primary" id="saveCopyBtn">Save copy</button></div>
+</dialog>
+
+<dialog id="pairModal">
+  <div class="modalHead"><b>Phone sync helper</b><div class="right"></div><button class="btn small" onclick="pairModal.close()">✕</button></div>
+  <div class="modalBody">
+    <div class="hint">Export JSON on laptop → share file to phone → Import JSON on phone.</div>
+    <div class="card" style="padding:12px; margin-top:10px">
+      <b>Paste import JSON here (phone → laptop)</b>
+      <textarea id="pasteBox" class="mono" placeholder="Paste full JSON export here"></textarea>
+      <div class="smallRow" style="margin-top:10px">
+        <button class="btn primary" id="pasteImportBtn">Import pasted JSON</button>
+      </div>
+    </div>
+  </div>
+  <div class="modalFoot"><button class="btn primary" onclick="pairModal.close()">Done</button></div>
+</dialog>
+
+<dialog id="scanModal">
+  <div class="modalHead"><b>Scan UPC/EAN</b><div class="right"></div><button class="btn small" onclick="stopScanner(); scanModal.close()">✕</button></div>
+  <div class="modalBody">
+    <div class="hint">Use Chrome on your Samsung for best results.</div>
+    <video id="scanVideo" playsinline></video>
+    <div class="smallRow" style="margin-top:10px">
+      <input id="manualBarcode" type="text" placeholder="Or type barcode…"/>
+      <button class="btn primary" id="lookupBarcodeBtn">Lookup</button>
+      <button class="btn" id="startScanBtn">Start camera</button>
+      <button class="btn" id="stopScanBtn">Stop</button>
+    </div>
+    <div class="hint" id="scanStatus"></div>
+  </div>
+  <div class="modalFoot"><button class="btn primary" onclick="stopScanner(); scanModal.close()">Done</button></div>
+</dialog>
+
+<script>
+const STORE_KEY = "mcv_v2_state";
+const VERSION = "2.0";
+const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const toastEl = $("#toast");
+function toast(msg){ toastEl.textContent=msg; toastEl.classList.add("show"); clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.classList.remove("show"),2600); }
+function uid(p="id"){ return p+"_"+Math.random().toString(16).slice(2)+"_"+Date.now().toString(16); }
+function safeIntYear(y){ const m=(y||"").match(/(19|20)\d{2}/); return m?parseInt(m[0],10):null; }
+function money(n){ return "$"+(Number(n||0)).toFixed(2); }
+function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+
+let state = loadState();
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return { version: VERSION, releases: [], copies: [] };
+    const s = JSON.parse(raw);
+    s.releases ||= []; s.copies ||= []; s.version ||= VERSION;
+    return s;
+  }catch(e){ return { version: VERSION, releases: [], copies: [] }; }
+}
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+function getCopiesForRelease(id){ return state.copies.filter(c=>c.release_id===id); }
+function computeKPIs(){
+  const releases=state.releases, copies=state.copies;
+  const collection=releases.filter(r=>r.status==="collection").length;
+  const wantlist=releases.filter(r=>r.status==="wantlist").length;
+  const totalCopies=copies.length;
+  const coll=releases.filter(r=>r.status==="collection");
+  const vmin=coll.reduce((a,r)=>a+Number(r.vmin||0),0);
+  const vmed=coll.reduce((a,r)=>a+Number(r.vmed||0),0);
+  const vmax=coll.reduce((a,r)=>a+Number(r.vmax||0),0);
+  $("#kCollection").textContent=collection.toLocaleString();
+  $("#kWantlist").textContent=wantlist.toLocaleString();
+  $("#kCopies").textContent=totalCopies.toLocaleString();
+  $("#vMin").textContent=money(vmin); $("#vMed").textContent=money(vmed); $("#vMax").textContent=money(vmax);
+}
+
+let view = { tab:"collection", q:"", sortBy:"artist_asc", mode:"grid" };
+function normalize(s){ return (s||"").toLowerCase(); }
+function matchesQuery(r,q){
+  if(!q) return true;
+  const hay=[r.artist,r.title,r.label,r.catno,r.notes,r.format,r.barcode].map(normalize).join(" • ");
+  return hay.includes(normalize(q));
+}
+function sortReleases(items){
+  const key=view.sortBy;
+  const withCopies=(r)=>getCopiesForRelease(r.id).length;
+  const getArtist=(r)=>normalize(r.artist);
+  const getTitle=(r)=>normalize(r.title);
+  const getYear=(r)=>safeIntYear(r.year)||0;
+  const getAdded=(r)=>Number(r.created_at||0);
+  const cmpStr=(a,b)=>a.localeCompare(b, undefined, {numeric:true, sensitivity:"base"});
+  const arr=items.slice();
+  arr.sort((a,b)=>{
+    switch(key){
+      case "artist_asc": return cmpStr(getArtist(a),getArtist(b));
+      case "artist_desc": return cmpStr(getArtist(b),getArtist(a));
+      case "title_asc": return cmpStr(getTitle(a),getTitle(b));
+      case "title_desc": return cmpStr(getTitle(b),getTitle(a));
+      case "year_desc": return (getYear(b)-getYear(a))||cmpStr(getArtist(a),getArtist(b));
+      case "year_asc": return (getYear(a)-getYear(b))||cmpStr(getArtist(a),getArtist(b));
+      case "added_desc": return (getAdded(b)-getAdded(a));
+      case "added_asc": return (getAdded(a)-getAdded(b));
+      case "copies_desc": return (withCopies(b)-withCopies(a))||cmpStr(getArtist(a),getArtist(b));
+      case "copies_asc": return (withCopies(a)-withCopies(b))||cmpStr(getArtist(a),getArtist(b));
+      default: return 0;
+    }
+  });
+  return arr;
+}
+function filteredReleases(){
+  let items = state.releases.filter(r=>matchesQuery(r, view.q));
+  if(view.tab==="collection") items=items.filter(r=>r.status==="collection");
+  if(view.tab==="wantlist") items=items.filter(r=>r.status==="wantlist");
+  if(view.tab==="dupes") items=items.filter(r=>getCopiesForRelease(r.id).length>=2);
+  items=sortReleases(items);
+  return items;
+}
+function setTab(tab){
+  view.tab=tab;
+  $$(".tab").forEach(t=>t.classList.toggle("active", t.dataset.tab===tab));
+  $("#listTitle").textContent = tab==="collection"?"Collection":tab==="wantlist"?"Wantlist":tab==="dupes"?"Duplicates":"All releases";
+  render();
+}
+function setMode(mode){
+  view.mode=mode;
+  $("#gridBtn").classList.toggle("primary", mode==="grid");
+  $("#tableBtn").classList.toggle("primary", mode==="table");
+  render();
+}
+function render(){
+  computeKPIs();
+  const items=filteredReleases();
+  const content=$("#content");
+  content.innerHTML="";
+  if(items.length===0){
+    const empty=document.createElement("div");
+    empty.className="card";
+    empty.innerHTML=`<b>No records found.</b><div class="hint">Clear search, switch tabs, or add a release.</div>`;
+    content.appendChild(empty);
+    return;
+  }
+  if(view.mode==="grid"){
+    const grid=document.createElement("div"); grid.className="collectionGrid";
+    for(const r of items){
+      const copiesCount=getCopiesForRelease(r.id).length;
+      const tile=document.createElement("div"); tile.className="tile"; tile.onclick=()=>openDetail(r.id);
+      const cover=document.createElement("div"); cover.className="cover";
+      if(r.cover){ const img=document.createElement("img"); img.src=r.cover; img.alt=`${r.artist} - ${r.title}`; cover.appendChild(img); }
+      else cover.textContent="No cover";
+      if(copiesCount>=2){
+        const b=document.createElement("div"); b.className="badge"; b.textContent=`${copiesCount} copies`; cover.appendChild(b);
+      } else if(r.status==="wantlist"){
+        const b=document.createElement("div"); b.className="badge"; b.textContent="Wantlist"; cover.appendChild(b);
+      }
+      const t=document.createElement("div"); t.className="t";
+      t.innerHTML=`<b>${escapeHtml(r.artist||"Unknown Artist")}</b>
+                   <small>${escapeHtml(r.title||"Untitled")}</small>
+                   <small class="muted">${escapeHtml(r.year||"")} • ${escapeHtml(r.label||"")}</small>`;
+      tile.appendChild(cover); tile.appendChild(t); grid.appendChild(tile);
+    }
+    content.appendChild(grid);
+  } else {
+    const wrap=document.createElement("div"); wrap.className="card"; wrap.style.padding="0";
+    const table=document.createElement("table"); table.className="table";
+    table.innerHTML=`<thead><tr>
+      <th style="width:18%">Artist</th><th style="width:26%">Title</th><th style="width:8%">Year</th>
+      <th style="width:16%">Label</th><th style="width:10%">Cat#</th><th style="width:10%">Format</th>
+      <th style="width:8%">Copies</th><th style="width:4%"></th>
+    </tr></thead><tbody></tbody>`;
+    const tb=table.querySelector("tbody");
+    for(const r of items){
+      const tr=document.createElement("tr");
+      const copiesCount=getCopiesForRelease(r.id).length;
+      tr.innerHTML=`<td>${escapeHtml(r.artist||"")}</td><td>${escapeHtml(r.title||"")}</td><td>${escapeHtml(r.year||"")}</td>
+                    <td>${escapeHtml(r.label||"")}</td><td class="mono">${escapeHtml(r.catno||"")}</td>
+                    <td>${escapeHtml(r.format||"")}</td><td>${copiesCount}</td>
+                    <td><button class="btn small" data-open="${r.id}">Open</button></td>`;
+      tr.querySelector("[data-open]").onclick=()=>openDetail(r.id);
+      tb.appendChild(tr);
+    }
+    wrap.appendChild(table); content.appendChild(wrap);
+  }
+}
+
+/* Add/Edit release */
+let editingId=null;
+function openReleaseModal(mode="add", release=null){
+  editingId=release?release.id:null;
+  $("#modalTitle").textContent = mode==="add"?"Add release":"Edit release";
+  $("#deleteReleaseBtn").style.display = release?"inline-block":"none";
+  $("#fArtist").value=release?.artist||"";
+  $("#fTitle").value=release?.title||"";
+  $("#fYear").value=release?.year||"";
+  $("#fLabel").value=release?.label||"";
+  $("#fCatno").value=release?.catno||"";
+  $("#fFormat").value=release?.format||"";
+  $("#fNotes").value=release?.notes||"";
+  $("#fStatus").value=release?.status||"collection";
+  $("#fBarcode").value=release?.barcode||"";
+  $("#fVmin").value=release?.vmin ?? 0;
+  $("#fVmed").value=release?.vmed ?? 0;
+  $("#fVmax").value=release?.vmax ?? 0;
+  releaseModal.showModal();
+}
+function saveRelease(){
+  const now=Date.now();
+  const data={
+    artist:$("#fArtist").value.trim(),
+    title:$("#fTitle").value.trim(),
+    year:$("#fYear").value.trim(),
+    label:$("#fLabel").value.trim(),
+    catno:$("#fCatno").value.trim(),
+    format:$("#fFormat").value.trim(),
+    notes:$("#fNotes").value.trim(),
+    status:$("#fStatus").value,
+    barcode:$("#fBarcode").value.trim(),
+    vmin:Number($("#fVmin").value||0),
+    vmed:Number($("#fVmed").value||0),
+    vmax:Number($("#fVmax").value||0),
+  };
+  if(editingId){
+    const idx=state.releases.findIndex(r=>r.id===editingId);
+    if(idx>=0){ state.releases[idx]={...state.releases[idx],...data,updated_at:now}; toast("Release updated."); }
+  } else {
+    const id=uid("rel");
+    state.releases.push({ id, cover:null, created_at:now, updated_at:now, ...data });
+    if(data.status==="collection"){
+      state.copies.push({ id:uid("cpy"), release_id:id, mediaCond:"Very Good Plus (VG+)", sleeveCond:"Very Good Plus (VG+)", paid:0, pdate:"", location:"", plays:0, notes:"", created_at:now, updated_at:now });
+    }
+    toast("Release added.");
+  }
+  saveState(); releaseModal.close(); render();
+}
+function deleteRelease(){
+  if(!editingId) return;
+  const r=state.releases.find(x=>x.id===editingId); if(!r) return;
+  if(!confirm(`Delete "${r.artist} — ${r.title}" and its copies?`)) return;
+  state.releases=state.releases.filter(x=>x.id!==editingId);
+  state.copies=state.copies.filter(c=>c.release_id!==editingId);
+  saveState(); toast("Deleted."); releaseModal.close(); render();
+}
+
+/* Detail */
+let detailId=null;
+function openDetail(id){
+  detailId=id;
+  const r=state.releases.find(x=>x.id===id); if(!r) return;
+  const copies=getCopiesForRelease(id);
+  $("#dTitle").textContent = `${r.artist||"Unknown"} — ${r.title||""}`;
+  const coverHtml = r.cover
+    ? `<img src="${r.cover}" alt="cover" style="width:180px;height:180px;object-fit:cover;border-radius:16px;border:1px solid var(--line)"/>`
+    : `<div class="qr" style="width:180px;height:180px">No cover</div>`;
+  const copiesHtml = copies.length ? copies.map((c,i)=>`
+    <div class="card" style="padding:10px; margin-top:10px">
+      <b>Copy ${i+1}</b>
+      <div class="hint">Media: <b>${escapeHtml(c.mediaCond||"")}</b> • Sleeve: <b>${escapeHtml(c.sleeveCond||"")}</b></div>
+      <div class="hint">Paid: <b>${money(c.paid||0)}</b> • Date: <b>${escapeHtml(c.pdate||"")}</b> • Location: <b>${escapeHtml(c.location||"")}</b></div>
+      <div class="hint">Notes: ${escapeHtml(c.notes||"")}</div>
+      <div class="smallRow" style="margin-top:8px">
+        <button class="btn small" onclick="editCopy('${c.id}')">Edit copy</button>
+        <button class="btn small bad" onclick="deleteCopy('${c.id}')">Delete copy</button>
+      </div>
+    </div>`).join("") : `<div class="hint">No copies yet. Add one below.</div>`;
+  $("#detailBody").innerHTML = `
+    <div class="row">
+      <div>
+        ${coverHtml}
+        <div class="hint" style="margin-top:8px">Status: <b>${escapeHtml(r.status)}</b> • Copies: <b>${copies.length}</b></div>
+        <div class="hint">Value: Min <b>${money(r.vmin||0)}</b> • Median <b>${money(r.vmed||0)}</b> • Max <b>${money(r.vmax||0)}</b></div>
+      </div>
+      <div>
+        <div class="card" style="padding:10px">
+          <b>Notes</b>
+          <div class="hint" style="white-space:pre-wrap">${escapeHtml(r.notes||"") || "<span class='muted'>None</span>"}</div>
+        </div>
+        <div style="margin-top:10px"><b>Copies</b>${copiesHtml}</div>
+      </div>
+    </div>`;
+  detailModal.showModal();
+}
+function openEditFromDetail(){ const r=state.releases.find(x=>x.id===detailId); if(!r) return; detailModal.close(); openReleaseModal("edit", r); }
+function openAddCopy(){
+  if(!detailId) return;
+  $("#cMedia").value="Very Good Plus (VG+)"; $("#cSleeve").value="Very Good Plus (VG+)";
+  $("#cPaid").value=0; $("#cPdate").value=""; $("#cLoc").value=""; $("#cNotes").value="";
+  copyModal.dataset.mode="add"; copyModal.dataset.copyId="";
+  copyModal.showModal();
+}
+function saveCopy(){
+  if(!detailId) return;
+  const now=Date.now();
+  const mode=copyModal.dataset.mode||"add";
+  const copyId=copyModal.dataset.copyId||"";
+  const data={
+    mediaCond:$("#cMedia").value, sleeveCond:$("#cSleeve").value, paid:Number($("#cPaid").value||0),
+    pdate:$("#cPdate").value.trim(), location:$("#cLoc").value.trim(), notes:$("#cNotes").value.trim(), updated_at:now
+  };
+  if(mode==="edit" && copyId){
+    const idx=state.copies.findIndex(c=>c.id===copyId);
+    if(idx>=0){ state.copies[idx]={...state.copies[idx],...data}; toast("Copy updated."); }
+  } else {
+    state.copies.push({ id:uid("cpy"), release_id:detailId, plays:0, created_at:now, ...data });
+    toast("Copy added.");
+  }
+  saveState(); copyModal.close(); openDetail(detailId); render();
+}
+function editCopy(copyId){
+  const c=state.copies.find(x=>x.id===copyId); if(!c) return;
+  $("#cMedia").value=c.mediaCond||"Very Good Plus (VG+)";
+  $("#cSleeve").value=c.sleeveCond||"Very Good Plus (VG+)";
+  $("#cPaid").value=c.paid ?? 0; $("#cPdate").value=c.pdate||""; $("#cLoc").value=c.location||""; $("#cNotes").value=c.notes||"";
+  copyModal.dataset.mode="edit"; copyModal.dataset.copyId=copyId;
+  copyModal.showModal();
+}
+function deleteCopy(copyId){
+  if(!confirm("Delete this copy?")) return;
+  state.copies=state.copies.filter(x=>x.id!==copyId);
+  saveState(); toast("Copy deleted."); openDetail(detailId); render();
+}
+
+/* Sample */
+function addSample(){
+  const now=Date.now();
+  const r1={ id:uid("rel"), artist:"Hank Williams", title:"Wait For The Light To Shine", year:"1951", label:"MGM", catno:"E-305", format:"LP, Album", status:"collection", notes:"Sample record.", barcode:"", cover:null, vmin:15, vmed:25, vmax:40, created_at:now, updated_at:now };
+  const r2={ id:uid("rel"), artist:"ABBA", title:"Arrival", year:"1976", label:"Atlantic", catno:"SD 18101", format:"LP, Album", status:"collection", notes:"Sample record.", barcode:"", cover:null, vmin:12, vmed:18, vmax:35, created_at:now, updated_at:now };
+  state.releases.push(r1,r2);
+  state.copies.push({ id:uid("cpy"), release_id:r1.id, mediaCond:"Very Good Plus (VG+)", sleeveCond:"Very Good (VG)", paid:0, pdate:"", location:"", plays:0, notes:"", created_at:now, updated_at:now });
+  state.copies.push({ id:uid("cpy"), release_id:r2.id, mediaCond:"Near Mint (NM or M-)", sleeveCond:"Very Good Plus (VG+)", paid:0, pdate:"", location:"", plays:0, notes:"", created_at:now, updated_at:now });
+  saveState(); toast("Added sample data."); render();
+}
+
+/* Export / Import */
+function exportJSON(){
+  const payload={ app:"Mike's Classic Vinyl", version:VERSION, exported_at:new Date().toISOString(), releases:state.releases, copies:state.copies };
+  const blob=new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="mikes-classic-vinyl-export.json";
+  document.body.appendChild(a); a.click(); a.remove(); toast("Exported JSON.");
+}
+function importJSONFile(file){
+  const fr=new FileReader();
+  fr.onload=()=>{
+    try{
+      const data=JSON.parse(fr.result);
+      if(!data || !Array.isArray(data.releases) || !Array.isArray(data.copies)){ alert("Not a valid import file."); return; }
+      state.releases=data.releases; state.copies=data.copies;
+      saveState(); toast("Import complete."); render();
+    }catch(e){ alert("Could not parse JSON."); }
+  };
+  fr.readAsText(file);
+}
+function wipeAll(){
+  if(!confirm("Delete ALL data in this browser? Export first if you want a backup.")) return;
+  state={ version:VERSION, releases:[], copies:[] }; saveState(); toast("All data deleted."); render();
+}
+
+/* Covers (MusicBrainz + Cover Art Archive) */
+async function mbFetch(url){
+  const res=await fetch(url, {headers:{"Accept":"application/json"}});
+  if(!res.ok) throw new Error("MB "+res.status);
+  return res.json();
+}
+function enc(s){ return encodeURIComponent(s); }
+async function findMBReleaseByBarcode(barcode){
+  const url=`https://musicbrainz.org/ws/2/release/?query=barcode:${enc(barcode)}&fmt=json&limit=1`;
+  const data=await mbFetch(url); const rel=data.releases && data.releases[0]; return rel?rel.id:null;
+}
+async function findMBReleaseByArtistTitle(artist,title){
+  const q=`artist:${artist} AND release:${title}`;
+  const url=`https://musicbrainz.org/ws/2/release/?query=${enc(q)}&fmt=json&limit=1`;
+  const data=await mbFetch(url); const rel=data.releases && data.releases[0]; return rel?rel.id:null;
+}
+async function coverFromMBID(mbid){
+  const url=`https://coverartarchive.org/release/${mbid}/front-500`;
+  const res=await fetch(url);
+  if(!res.ok) return null;
+  return res.url || url;
+}
+async function fetchCoverForReleaseId(releaseId){
+  const r=state.releases.find(x=>x.id===releaseId); if(!r) return;
+  if(r.cover){ toast("Cover already set."); return; }
+  try{
+    toast("Looking up cover…");
+    let mbid=null;
+    if(r.barcode) mbid=await findMBReleaseByBarcode(r.barcode);
+    if(!mbid) mbid=await findMBReleaseByArtistTitle(r.artist||"", r.title||"");
+    if(!mbid){ toast("No match found."); return; }
+    const cover=await coverFromMBID(mbid);
+    if(!cover){ toast("No cover art found."); return; }
+    r.cover=cover; r.updated_at=Date.now(); saveState(); toast("Cover added!"); render(); if(detailModal.open) openDetail(releaseId);
+  }catch(e){ console.error(e); toast("Cover fetch failed. Try again in a minute."); }
+}
+async function fetchCoversForItems(items){
+  let done=0;
+  for(const r of items){
+    if(r.cover){ done++; continue; }
+    await fetchCoverForReleaseId(r.id);
+    done++;
+    await new Promise(res=>setTimeout(res,1100));
+  }
+  toast(`Cover fetch done (${done}/${items.length}).`);
+}
+function fetchCoversVisible(){ fetchCoversForItems(filteredReleases().slice(0,80)); }
+function fetchCoversAll(){
+  const items=state.releases.filter(r=>!r.cover).slice(0,250);
+  if(items.length===0){ toast("No missing covers."); return; }
+  if(!confirm(`Fetch covers for up to ${items.length} releases now? This runs about 1 per second.`)) return;
+  fetchCoversForItems(items);
+}
+
+/* Barcode scan */
+let scanStream=null;
+async function startScanner(){
+  const v=$("#scanVideo");
+  $("#scanStatus").textContent="Starting camera…";
+  try{
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}, audio:false});
+    v.srcObject=scanStream; await v.play();
+    $("#scanStatus").textContent="Camera on. Aim at barcode…";
+    if("BarcodeDetector" in window){
+      const detector=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e","code_128"]});
+      const loop=async ()=>{
+        if(!scanStream) return;
+        try{
+          const codes=await detector.detect(v);
+          if(codes?.[0]?.rawValue){
+            const code=codes[0].rawValue.trim();
+            $("#manualBarcode").value=code;
+            $("#scanStatus").textContent=`Detected: ${code}`;
+            await lookupBarcode(code);
+          }
+        }catch(e){}
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    } else {
+      $("#scanStatus").textContent="BarcodeDetector not supported here. Type barcode manually.";
+    }
+  }catch(e){
+    $("#scanStatus").textContent="Camera permission denied or unavailable.";
+  }
+}
+function stopScanner(){
+  if(scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream=null; }
+  $("#scanVideo").srcObject=null; $("#scanStatus").textContent="";
+}
+async function lookupBarcode(code){
+  const barcode=(code||"").replace(/\s+/g,"");
+  if(!barcode){ toast("No barcode."); return; }
+  try{
+    toast("Looking up barcode…");
+    const mbid=await findMBReleaseByBarcode(barcode);
+    if(!mbid){ toast("No match found."); return; }
+    const url=`https://musicbrainz.org/ws/2/release/${mbid}?inc=artists+labels&fmt=json`;
+    const rel=await mbFetch(url);
+    const artist=rel["artist-credit"]?.[0]?.artist?.name || "";
+    const title=rel.title || "";
+    const date=rel.date || "";
+    const label=rel["label-info"]?.[0]?.label?.name || "";
+    const catno=rel["label-info"]?.[0]?.["catalog-number"] || "";
+    openReleaseModal("add", null);
+    $("#fArtist").value=artist; $("#fTitle").value=title; $("#fYear").value=date; $("#fLabel").value=label; $("#fCatno").value=catno;
+    $("#fBarcode").value=barcode; $("#fStatus").value="collection";
+    const cover=await coverFromMBID(mbid);
+    if(cover){ releaseModal.dataset.tempCover=cover; toast("Found details + cover. Save to add."); } else { releaseModal.dataset.tempCover=""; toast("Found details. No cover found."); }
+  }catch(e){ console.error(e); toast("Barcode lookup failed."); }
+}
+
+/* Sync helper */
+function importFromPaste(){
+  const txt=$("#pasteBox").value.trim();
+  if(!txt){ toast("Nothing pasted."); return; }
+  try{
+    const data=JSON.parse(txt);
+    if(!data || !Array.isArray(data.releases) || !Array.isArray(data.copies)){ alert("Not a valid export/import JSON."); return; }
+    state.releases=data.releases; state.copies=data.copies;
+    saveState(); toast("Imported pasted JSON."); render(); pairModal.close();
+  }catch(e){ alert("Could not parse pasted JSON."); }
+}
+
+/* Wire UI */
+$("#addBtn").onclick=()=>openReleaseModal("add");
+$("#addWantBtn").onclick=()=>{ openReleaseModal("add"); $("#fStatus").value="wantlist"; };
+$("#saveReleaseBtn").onclick=()=>{
+  const tempCover=releaseModal.dataset.tempCover||"";
+  const wasNew=!editingId;
+  saveRelease();
+  if(tempCover && wasNew){
+    const newest=state.releases.slice().sort((a,b)=>(b.created_at||0)-(a.created_at||0))[0];
+    if(newest && !newest.cover){ newest.cover=tempCover; newest.updated_at=Date.now(); saveState(); render(); }
+  }
+  releaseModal.dataset.tempCover="";
+};
+$("#deleteReleaseBtn").onclick=deleteRelease;
+$("#fetchCoverBtn").onclick=()=>{ if(editingId) fetchCoverForReleaseId(editingId); else toast("Save first, then fetch cover."); };
+
+$("#sampleBtn").onclick=addSample;
+$("#wipeBtn").onclick=wipeAll;
+$("#exportBtn").onclick=exportJSON;
+$("#importInput").addEventListener("change",(e)=>{ const f=e.target.files?.[0]; if(f) importJSONFile(f); e.target.value=""; });
+
+$("#coversBtn").onclick=fetchCoversAll;
+$("#coversSelBtn").onclick=fetchCoversVisible;
+
+$("#q").addEventListener("input",(e)=>{ view.q=e.target.value; render(); });
+$("#searchBtn").onclick=()=>{ view.q=$("#q").value; render(); };
+$("#clearBtn").onclick=()=>{ $("#q").value=""; view.q=""; render(); };
+
+$("#sortBy").addEventListener("change",()=>{ view.sortBy=$("#sortBy").value; render(); });
+$("#gridBtn").onclick=()=>setMode("grid");
+$("#tableBtn").onclick=()=>setMode("table");
+
+$$(".tab").forEach(t=>t.onclick=()=>setTab(t.dataset.tab));
+
+$("#editReleaseBtn").onclick=openEditFromDetail;
+$("#addCopyBtn").onclick=openAddCopy;
+$("#saveCopyBtn").onclick=saveCopy;
+$("#fetchCoverDetailBtn").onclick=()=>fetchCoverForReleaseId(detailId);
+
+$("#pairBtn").onclick=()=>pairModal.showModal();
+$("#pasteImportBtn").onclick=importFromPaste;
+
+$("#scanBtn").onclick=()=>scanModal.showModal();
+$("#startScanBtn").onclick=startScanner;
+$("#stopScanBtn").onclick=()=>{ stopScanner(); toast("Scanner stopped."); };
+$("#lookupBarcodeBtn").onclick=()=>lookupBarcode($("#manualBarcode").value);
+$("#manualBarcode").addEventListener("keydown",(e)=>{ if(e.key==="Enter") lookupBarcode($("#manualBarcode").value); });
+
+scanModal.addEventListener("close", stopScanner);
+
+setMode("grid"); setTab("collection"); render();
+</script>
+</body>
+</html>
